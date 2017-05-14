@@ -24,8 +24,8 @@ void set_ViewMatrix_for_driver(void) {
 	Matrix_CAMERA_driver_inverse = ModelMatrix_CAR_BODY * ModelMatrix_CAR_BODY_to_DRIVER;
 
 	ViewMatrix = glm::affineInverse(Matrix_CAMERA_driver_inverse);
-	ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-	//viewProjectionMatrix[1] = projectionMatrix[1] * ViewMatrix;
+	//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+	ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 }
 
 /*
@@ -54,7 +54,8 @@ void initialize_camera(void) {
 	camera_wv.pos = -(ViewMatrix[3].x*camera_wv.uaxis + ViewMatrix[3].y*camera_wv.vaxis + ViewMatrix[3].z*camera_wv.naxis);
 
 	camera_wv.move = 0;
-	camera_wv.fovy = 30.0f, camera_wv.aspect_ratio = 1.0f; camera_wv.near_c = 5.0f; camera_wv.far_c = 10000.0f;
+	camera_wv.fovy = 80.0f, camera_wv.aspect_ratio = 1.0f; camera_wv.near_c = 5.0f; camera_wv.far_c = 10000.0f;
+	//camera_wv.fovy = 15.0f, camera_wv.aspect_ratio = 1.0f; camera_wv.near_c = 0.1f; camera_wv.far_c = 1000.0f;
 
 	camera_wv.zoom_factor = 1.0f;
 
