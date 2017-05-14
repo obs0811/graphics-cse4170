@@ -2,13 +2,13 @@
 typedef struct _Camera {
 	glm::vec3 pos;
 	glm::vec3 uaxis, vaxis, naxis;
-
+	float zoom_factor;
 	float fovy, aspect_ratio, near_c, far_c;
 	int move;
 } Camera;
 
 Camera camera_wv;
-enum _CameraType { CAMERA_WORLD_VIEWER, CAMERA_DRIVER, CAMERA_COW } camera_type;
+enum _CameraType { CAMERA_WORLD_VIEWER, CAMERA_DRIVER } camera_type;
 
 void set_ViewMatrix_for_world_viewer(void) {
 	ViewMatrix = glm::mat4(camera_wv.uaxis.x, camera_wv.vaxis.x, camera_wv.naxis.x, 0.0f,
@@ -25,15 +25,7 @@ void set_ViewMatrix_for_driver(void) {
 
 	ViewMatrix = glm::affineInverse(Matrix_CAMERA_driver_inverse);
 	ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-}
-
-void set_ViewMatrix_for_cow(void) {
-	glm::mat4 Matrix_CAMERA_cow_inverse;
-
-	Matrix_CAMERA_cow_inverse = ModelMatrix_OBJECT * ModelMatrix_COW_BODY_to_COW_EYE;
-
-	ViewMatrix = glm::affineInverse(Matrix_CAMERA_cow_inverse);
-	ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+	//viewProjectionMatrix[1] = projectionMatrix[1] * ViewMatrix;
 }
 
 /*
@@ -63,6 +55,8 @@ void initialize_camera(void) {
 
 	camera_wv.move = 0;
 	camera_wv.fovy = 30.0f, camera_wv.aspect_ratio = 1.0f; camera_wv.near_c = 5.0f; camera_wv.far_c = 10000.0f;
+
+	camera_wv.zoom_factor = 1.0f;
 
 	ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 
