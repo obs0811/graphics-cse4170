@@ -45,7 +45,7 @@ glm::mat4 modelViewProjectionMatrix; // This one is sent to vertex shader when i
 #include "Geometry.h"
 #include "Car.h"
 
-int timer_car, timer_optimus, timer_boxes, timer_airplane, timer_robot;
+int timer_car, timer_optimus, timer_boxes, timer_airplane, timer_robot, timer_tiger;
 
 float rotation_angle_car = 0.0f;
 int stop_car = 0;
@@ -70,9 +70,15 @@ int stop_robot_leg = 0;
 int rotation_angle_robot_body = 0.0f;
 int stop_robot_body = 0;
 
+int rotation_angle_tiger = 0.0f;
+int stop_tiger = 0;
+
 int move_up = 0;
 
 int rotate_uaxis = 0, rotate_vaxis = 0, rotate_naxis = 0;
+
+int sky_mode = 0;
+glm::mat4 ViewMatrixTmp;
 
 void draw_objects_in_world(void) {
 	//glm::mat4 ModelMatrix_OBJECT;
@@ -135,6 +141,62 @@ void draw_objects_in_world(void) {
 	ModelViewProjectionMatrix *= Matrix_TIGER_tmp;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_object(OBJECT_OPTIMUS, 0xcc / 255.0f, 0x00 / 255.0f, 0x00 / 255.0f); // Red
+
+	ModelMatrix_OBJECT = glm::translate(glm::mat4(1.0f), glm::vec3(-25.0f, 0.0f, 35.0f));
+	ModelMatrix_OBJECT = glm::scale(ModelMatrix_OBJECT, glm::vec3(10.0f, 10.0f, 10.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix_OBJECT;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+	glUniform3f(loc_primitive_color, 51.0f / 255.0f, 153.0f / 255.0f,  102.0f / 255.0f); // green
+	draw_geom_obj(GEOM_OBJ_ID_COW); // draw cow
+
+	ModelMatrix_OBJECT = glm::translate(glm::mat4(1.0f), glm::vec3(40.0f, 0.0f, 20.0f));
+	ModelMatrix_OBJECT = glm::rotate(ModelMatrix_OBJECT, TO_RADIAN*90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::rotate(ModelMatrix_OBJECT, -TO_RADIAN*90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::scale(ModelMatrix_OBJECT, glm::vec3(2.0f, 2.0f, 2.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix_OBJECT;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+	glUniform3f(loc_primitive_color, 255 / 255.0f, 153 / 255.0f, 102 / 255.0f); // orange
+	draw_geom_obj(GEOM_OBJ_ID_TEAPOT); // draw teapot
+
+	ModelMatrix_OBJECT = glm::translate(glm::mat4(1.0f), glm::vec3(40.0f, 0.0f, 33.0f));
+	ModelMatrix_OBJECT = glm::rotate(ModelMatrix_OBJECT, TO_RADIAN*90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::scale(ModelMatrix_OBJECT, glm::vec3(15.0f, 15.0f, 15.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix_OBJECT;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+	glUniform3f(loc_primitive_color, 255 / 255.0f, 153 / 255.0f,  153 / 255.0f); // green
+	draw_geom_obj(GEOM_OBJ_ID_COW); // draw cow
+
+	// tiger running around the circle
+	static float tiger_y = 0.0f;
+	static float tiger_body_angle = 0.0f; 
+	if(!stop_tiger) {
+		//printf("rotation_angle_tiger % 20: %d\n", rotation_angle_tiger % 20);
+		//printf("tiger_body_angle: %.2f\n", tiger_body_angle);
+		if(rotation_angle_tiger % 20 < 10) {
+			tiger_y += 0.5f;
+			tiger_body_angle += 3.0f;
+		}
+		else if(rotation_angle_tiger % 20 < 20) {
+			tiger_y -= 0.5f;
+			tiger_body_angle -= 3.0f;
+		}
+	}
+	ModelMatrix_OBJECT = glm::rotate(glm::mat4(1.0f), TO_RADIAN*rotation_angle_tiger, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::translate(ModelMatrix_OBJECT, glm::vec3(-75.0f, tiger_y, 20.0f));
+	//ModelMatrix_OBJECT = glm::rotate(ModelMatrix_OBJECT, TO_RADIAN*rotation_angle_tiger, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::rotate(ModelMatrix_OBJECT, -TO_RADIAN*tiger_body_angle, glm::vec3(1.0f, 0.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::rotate(ModelMatrix_OBJECT, TO_RADIAN*180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::scale(ModelMatrix_OBJECT, glm::vec3(7.0f, 7.0f, 7.0f));
+	ModelMatrix_OBJECT = glm::rotate(ModelMatrix_OBJECT, -135.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_OBJECT *= Matrix_TIGER_tmp;
+	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix_OBJECT;
+	//ModelViewProjectionMatrix = glm::rotate(ModelViewProjectionMatrix, -135.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
+	//ModelViewProjectionMatrix *= Matrix_TIGER_tmp;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_object(OBJECT_TIGER, 255 / 255.0f, 153 / 255.0f, 51 / 255.0f); // orange
 
 	for (i = 0; i < 18; i++) {
 		angle = TO_RADIAN*20.0f*i;
@@ -221,18 +283,24 @@ void draw_objects_in_world(void) {
 	draw_object(OBJECT_OPTIMUS, 0 / 255.0f, 255 / 255.0f, 255 / 255.0f); // Cyan
 	
 	//ModelViewProjectionMatrix = glm::translate(ViewProjectionMatrix[camera_index], glm::vec3(-2.0f, 1.0f, -3.5f));
-	ModelMatrix_CAR_BODY = glm::rotate(glm::mat4(1.0f), -rotation_angle_airplane, glm::vec3(0.0f, 1.0f, 0.0f));
+	/*ModelMatrix_CAR_BODY = glm::rotate(glm::mat4(1.0f), -rotation_angle_airplane, glm::vec3(0.0f, 1.0f, 0.0f));
 	ModelMatrix_CAR_BODY = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(20.0f, 4.89f, 0.0f));
 	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, 90.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
-
+	//ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, 40.0f*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
 	ModelMatrix_OBJECT = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(0.0f, 20.0f, -50.0f));
+	ModelMatrix_OBJECT = glm::scale(ModelMatrix_OBJECT, glm::vec3(10.0f, 10.0f, 10.0f));
+	*/
+	ModelMatrix_OBJECT = glm::rotate(glm::mat4(1.0f), -rotation_angle_airplane, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::translate(ModelMatrix_OBJECT, glm::vec3(20.0f, 4.89f, 0.0f));
+	ModelMatrix_OBJECT = glm::rotate(ModelMatrix_OBJECT, 90.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_OBJECT = glm::translate(ModelMatrix_OBJECT, glm::vec3(0.0f, 20.0f, -50.0f));
 	ModelMatrix_OBJECT = glm::scale(ModelMatrix_OBJECT, glm::vec3(10.0f, 10.0f, 10.0f));
 
 	ModelViewProjectionMatrix = ViewProjectionMatrix * ModelMatrix_OBJECT;
 	ModelViewProjectionMatrix = glm::rotate(ModelViewProjectionMatrix, 30.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
 	ModelViewProjectionMatrix = glm::rotate(ModelViewProjectionMatrix, 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 	ModelViewProjectionMatrix = glm::scale(ModelViewProjectionMatrix, glm::vec3(1.5f, 1.5f, 1.5f));
-	//ModelViewProjectionMatrix = glm::rotate(ModelViewProjectionMatrix, 30.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelViewProjectionMatrix = glm::rotate(ModelViewProjectionMatrix, 30.0f*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
 	ModelViewProjectionMatrix *= Matrix_TIGER_tmp;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_object(OBJECT_AIRPLANE, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f); // White
@@ -484,7 +552,7 @@ int viewDragon = 0;
 float prp = -20.0f;
 
 void motion(int x, int y) {
-	if (!camera_wv.move || (camera_type != CAMERA_WORLD_VIEWER)) 
+	if (!camera_wv.move || (camera_type != CAMERA_WORLD_VIEWER) || sky_mode) 
 		return;
 
 	// Move camera 
@@ -501,7 +569,7 @@ void motion(int x, int y) {
 	//renew_cam_orientation_rotation_around_v_axis(prevx - x);
 
 	prevx = x; prevy = y;
-
+	
 	set_ViewMatrix_for_world_viewer();
 	if(camera_type == CAMERA_WORLD_VIEWER)
 		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
@@ -554,10 +622,14 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 	case 'd':
+		if(sky_mode)	break;
+		//if(sky_mode)	sky_mode = 0;
 		camera_type = CAMERA_DRIVER;
 		glutPostRedisplay();
 		break;
 	case 'w':
+		if(sky_mode)	break;
+		//if(sky_mode)	sky_mode = 0;
 		if(viewDragon) {
 			viewDragon = 0;
 			set_ViewMatrix_for_world_viewer();
@@ -568,10 +640,10 @@ void keyboard(unsigned char key, int x, int y) {
 		ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 		glutPostRedisplay();
 		break;
-	case 'o':
+	/*case 'o':
 		flag_draw_world_objects = 1 - flag_draw_world_objects;
 		glutPostRedisplay();
-		break;
+		break;*/
 	case 'y':
 		if (!move_up)
 			move_up = 1;
@@ -579,6 +651,7 @@ void keyboard(unsigned char key, int x, int y) {
 			move_up = 0;
 		break;
 	case 'u':
+		if(sky_mode)	break;
 		if(camera_type == CAMERA_WORLD_VIEWER) {
 			renew_cam_orientation_rotation_around_u_axis(1);
 			set_ViewMatrix_for_world_viewer();
@@ -591,9 +664,10 @@ void keyboard(unsigned char key, int x, int y) {
 			ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 		}
 		//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	case 'i':
+		if(sky_mode)	break;
 		if(camera_type == CAMERA_WORLD_VIEWER) {
 			renew_cam_orientation_rotation_around_u_axis(-1);
 			set_ViewMatrix_for_world_viewer();
@@ -606,9 +680,10 @@ void keyboard(unsigned char key, int x, int y) {
 			ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 		}
 		//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	case 'v':
+		if(sky_mode)	break;
 		if(camera_type == CAMERA_WORLD_VIEWER) {
 			renew_cam_orientation_rotation_around_v_axis(1);
 			set_ViewMatrix_for_world_viewer();
@@ -621,9 +696,10 @@ void keyboard(unsigned char key, int x, int y) {
 			ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 		}
 		//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	case 'b':
+		if(sky_mode)	break;
 		if(camera_type == CAMERA_WORLD_VIEWER) {
 			renew_cam_orientation_rotation_around_v_axis(-1);
 			set_ViewMatrix_for_world_viewer();
@@ -636,9 +712,10 @@ void keyboard(unsigned char key, int x, int y) {
 			ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 		}
 		//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	case 'n':
+		if(sky_mode)	break;
 		if(camera_type == CAMERA_WORLD_VIEWER) {
 			renew_cam_orientation_rotation_around_n_axis(1);
 			set_ViewMatrix_for_world_viewer();
@@ -651,9 +728,10 @@ void keyboard(unsigned char key, int x, int y) {
 			ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 		}
 		//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	case 'm':
+		if(sky_mode)	break;
 		if(camera_type == CAMERA_WORLD_VIEWER) {
 			renew_cam_orientation_rotation_around_n_axis(-1);
 			set_ViewMatrix_for_world_viewer();
@@ -666,9 +744,11 @@ void keyboard(unsigned char key, int x, int y) {
 			ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 		}
 		//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	case 't':
+		if(sky_mode)	break;
+		//if(sky_mode)	sky_mode = 0;
 		if(!viewDragon) {
 			puts("***** viewDragon mode is set! ****");
 			viewDragon = 1;
@@ -706,7 +786,7 @@ void keyboard(unsigned char key, int x, int y) {
 			camera[1].zoom_factor *= 1.05f;
 			if(camera[1].zoom_factor > 6.0f)
 				camera[1].zoom_factor = 6.0f;
-			printf("[driver] camera[1].zoom_factor: %f\n", camera[1].zoom_factor);
+			//printf("[driver] camera[1].zoom_factor: %f\n", camera[1].zoom_factor);
 			projectionMatrix[1] = glm::perspective(camera[1].zoom_factor*TO_RADIAN*camera[1].fov_y, camera[1].aspect_ratio, camera[1].near_clip, camera[1].far_clip);
 			ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 		}
@@ -719,7 +799,7 @@ void keyboard(unsigned char key, int x, int y) {
 			ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 		}
 		//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	case 'x':
 		// zoom in (the size of objects filmed in the camera becomes larger)
@@ -727,7 +807,7 @@ void keyboard(unsigned char key, int x, int y) {
 			camera[1].zoom_factor *= 0.95f;
 			if(camera[1].zoom_factor < 0.1f)
 				camera[1].zoom_factor = 0.1f;
-			printf("[driver] camera[1].zoom_factor: %f\n", camera[1].zoom_factor);
+			//printf("[driver] camera[1].zoom_factor: %f\n", camera[1].zoom_factor);
 			projectionMatrix[1] = glm::perspective(camera[1].zoom_factor*TO_RADIAN*camera[1].fov_y, camera[1].aspect_ratio, camera[1].near_clip, camera[1].far_clip);
 			ViewProjectionMatrix = projectionMatrix[1] * ViewMatrix;
 		}
@@ -742,7 +822,7 @@ void keyboard(unsigned char key, int x, int y) {
 		//ProjectionMatrix = glm::perspective(camera[1].zoom_factor*TO_RADIAN*camera[1].fov_y, camera[1].aspect_ratio, camera[1].near_clip, camera[1].far_clip);
 		//ProjectionMatrix = glm::perspective(camera[1].zoom_factor*TO_RADIAN, camera[1].aspect_ratio, camera[1].near_clip, camera[1].far_clip);
 		//ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-		glutPostRedisplay();
+		//glutPostRedisplay();
 		break;
 	case '1':
 		if(!stop_car)
@@ -772,6 +852,28 @@ void keyboard(unsigned char key, int x, int y) {
 		stop_robot_arm = -stop_robot_arm + 1;
 		stop_robot_leg = -stop_robot_leg + 1;
 		stop_robot_body = -stop_robot_body + 1;
+		break;
+	case '6':
+		stop_tiger = 1 - stop_tiger;
+		break;
+	case 's':
+		sky_mode = 1 - sky_mode;
+		printf("[key 's'] sky_mode: %d\n", sky_mode);
+		// camera view from sky
+		if(sky_mode) {
+			ViewMatrixTmp = ViewMatrix;
+			ViewMatrix = glm::lookAt(glm::vec3(0.0f, 105.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+			camera_wv.pos = -(ViewMatrix[3].x*camera_wv.uaxis + ViewMatrix[3].y*camera_wv.vaxis + ViewMatrix[3].z*camera_wv.naxis);
+			ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+			//glutPostRedisplay();
+		}
+		else {
+			puts("['s' key] return to original camera setting"); 
+			ViewMatrix = ViewMatrixTmp;
+			camera_wv.pos = -(ViewMatrix[3].x*camera_wv.uaxis + ViewMatrix[3].y*camera_wv.vaxis + ViewMatrix[3].z*camera_wv.naxis);
+			ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
+			//glutPostRedisplay();
+		}
 		break;
 	case 27: // ESC key
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
@@ -848,6 +950,10 @@ void timer_scene(int timestamp_scene) {
 		rotation_angle_robot_body = (timer_robot % 360);
 		timer_robot = (timer_robot + 1) % INT_MAX;
 	}
+	if(!stop_tiger) {
+		rotation_angle_tiger = (timer_tiger % 360);
+		timer_tiger = (timer_tiger + 1) % INT_MAX;
+	}
 	glutPostRedisplay();
 	glutTimerFunc(100, timer_scene, (timestamp_scene + 1) % INT_MAX);
 }
@@ -886,7 +992,8 @@ void initialize_OpenGL(void) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0 / 255.0f, 153 / 255.0f, 1.0f);
 
 	ViewMatrix = glm::mat4(1.0f);
 	ProjectionMatrix = glm::mat4(1.0f);
